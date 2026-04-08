@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>玄武纪 · 会议室预约系统（含服务需求）</title>
-    <!-- QRCode.js 轻量二维码生成库 -->
+    <title>玄武纪 · 会议室预约系统（含邮件通知）</title>
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -13,63 +13,34 @@
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
         }
-
         body {
             background: #f4f7fc;
             font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
             padding: 20px 16px 48px;
             color: #0f2b3d;
         }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        /* 卡片通用样式 */
+        .container { max-width: 800px; margin: 0 auto; }
         .card {
             background: white;
             border-radius: 32px;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04), 0 2px 4px rgba(0, 0, 0, 0.02);
             margin-bottom: 24px;
             overflow: hidden;
-            transition: all 0.2s ease;
         }
-
         .card-header {
             background: linear-gradient(135deg, #183f5c 0%, #1e4a6e 100%);
             color: white;
             padding: 24px 28px;
         }
-
-        .card-header h1 {
-            font-size: 1.8rem;
-            font-weight: 650;
-            letter-spacing: -0.3px;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
+        .card-header h1 { font-size: 1.8rem; font-weight: 650; margin-bottom: 8px; }
         .card-header .sub {
             font-size: 0.85rem;
             opacity: 0.9;
-            margin-top: 8px;
             border-left: 3px solid #f9b43a;
             padding-left: 14px;
-            background: rgba(255,255,240,0.1);
-            border-radius: 0 12px 12px 0;
         }
-
-        .form-body {
-            padding: 28px 26px;
-        }
-
-        .field {
-            margin-bottom: 28px;
-        }
-
+        .form-body { padding: 28px 26px; }
+        .field { margin-bottom: 28px; }
         .field-label {
             font-weight: 620;
             font-size: 1rem;
@@ -77,25 +48,16 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            flex-wrap: wrap;
             color: #1e2f3e;
         }
-
-        .required-star {
-            color: #e53e3e;
-            font-size: 1.1rem;
-            font-weight: 600;
-        }
-
+        .required-star { color: #e53e3e; }
         .hint {
             font-size: 0.7rem;
-            font-weight: normal;
             background: #eef3fc;
             padding: 2px 10px;
             border-radius: 30px;
             color: #2c6280;
         }
-
         input, select, textarea {
             width: 100%;
             padding: 12px 18px;
@@ -103,16 +65,13 @@
             border: 1.5px solid #e2edf2;
             border-radius: 28px;
             transition: 0.2s;
-            background: #ffffff;
             font-family: inherit;
         }
-
         input:focus, select:focus, textarea:focus {
             outline: none;
             border-color: #1e5a7a;
             box-shadow: 0 0 0 3px rgba(30, 90, 122, 0.12);
         }
-
         .options-group {
             display: flex;
             flex-wrap: wrap;
@@ -120,10 +79,8 @@
             background: #fafeff;
             padding: 12px 16px;
             border-radius: 40px;
-            margin-top: 6px;
             border: 1px solid #e6f0f5;
         }
-
         .option-item {
             display: flex;
             align-items: center;
@@ -131,16 +88,7 @@
             cursor: pointer;
             font-size: 0.94rem;
         }
-
-        .option-item input {
-            width: 18px;
-            height: 18px;
-            margin: 0;
-            cursor: pointer;
-            accent-color: #1e5a7a;
-        }
-
-        /* 时段网格 */
+        .option-item input { width: 18px; height: 18px; accent-color: #1e5a7a; }
         .time-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
@@ -150,7 +98,6 @@
             border-radius: 32px;
             border: 1px solid #e2edf2;
         }
-
         .time-check {
             display: flex;
             align-items: center;
@@ -159,23 +106,14 @@
             padding: 8px 14px;
             border-radius: 48px;
             border: 1px solid #dce9f0;
-            transition: all 0.1s;
         }
-
-        .time-check input {
-            width: 18px;
-            height: 18px;
-            margin: 0;
-            accent-color: #1e5a7a;
-        }
-
+        .time-check input { width: 18px; height: 18px; accent-color: #1e5a7a; }
         .btn-group {
             display: flex;
             gap: 16px;
             margin-top: 32px;
             flex-wrap: wrap;
         }
-
         .btn {
             flex: 1;
             padding: 14px 12px;
@@ -184,51 +122,28 @@
             font-weight: 600;
             font-size: 1rem;
             cursor: pointer;
-            transition: 0.2s;
             background: #eef3fc;
             color: #1e5a7a;
         }
-
         .btn-primary {
             background: #1e5a7a;
             color: white;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
         }
-
-        .btn-primary:hover {
-            background: #0f4260;
-            transform: scale(0.98);
-        }
-
+        .btn-primary:hover { background: #0f4260; transform: scale(0.98); }
         .btn-secondary {
             background: #ffffff;
             border: 1.5px solid #cbdde6;
-            color: #2c5a72;
         }
-
         .qrcode-section {
             background: white;
             border-radius: 32px;
-            padding: 20px 20px;
+            padding: 20px;
             text-align: center;
             margin-bottom: 24px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
             border: 1px solid #e9f0f5;
         }
-
-        .qrcode-title {
-            font-weight: 620;
-            margin-bottom: 14px;
-            font-size: 1rem;
-            color: #1e3a4b;
-        }
-
-        #qrcode {
-            display: flex;
-            justify-content: center;
-            margin: 10px auto;
-        }
-
+        .qrcode-title { font-weight: 620; margin-bottom: 14px; color: #1e3a4b; }
+        #qrcode { display: flex; justify-content: center; margin: 10px auto; }
         .copy-link-btn {
             background: #eef3fc;
             border: none;
@@ -238,18 +153,14 @@
             font-weight: 500;
             cursor: pointer;
             margin-top: 12px;
-            transition: 0.1s;
             color: #1e5a7a;
         }
-
         .records-section {
             background: white;
             border-radius: 32px;
             padding: 20px 22px 28px;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.02);
             border: 1px solid #eef2f6;
         }
-
         .records-header {
             display: flex;
             justify-content: space-between;
@@ -259,23 +170,14 @@
             border-bottom: 2px solid #e2edf2;
             padding-bottom: 14px;
         }
-
-        .record-list {
-            max-height: 420px;
-            overflow-y: auto;
-            padding-right: 4px;
-        }
-
+        .record-list { max-height: 420px; overflow-y: auto; }
         .record-item {
             background: #fbfefd;
             border-radius: 24px;
             padding: 16px;
             margin-bottom: 14px;
             border-left: 5px solid #7fb4cf;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
-            transition: 0.1s;
         }
-
         .record-meta {
             display: flex;
             justify-content: space-between;
@@ -284,24 +186,14 @@
             gap: 8px;
             font-weight: 600;
         }
-
         .delete-record {
             background: none;
             border: none;
             color: #cf7b5e;
             cursor: pointer;
             font-weight: bold;
-            font-size: 1rem;
-            padding: 4px 8px;
-            border-radius: 40px;
         }
-
-        .empty-records {
-            text-align: center;
-            color: #88a3bc;
-            padding: 36px 12px;
-        }
-
+        .empty-records { text-align: center; color: #88a3bc; padding: 36px 12px; }
         .toast {
             position: fixed;
             bottom: 28px;
@@ -312,38 +204,26 @@
             text-align: center;
             padding: 12px 20px;
             border-radius: 60px;
-            font-size: 0.9rem;
             z-index: 1100;
             opacity: 0;
             transition: opacity 0.2s ease;
             pointer-events: none;
-            font-weight: 500;
-            box-shadow: 0 6px 14px rgba(0,0,0,0.1);
         }
-
         .sub-field {
             margin-top: 16px;
             margin-left: 8px;
             padding-left: 16px;
             border-left: 3px solid #bbd4e6;
         }
-
         @media (max-width: 550px) {
-            .time-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-            .form-body {
-                padding: 20px 18px;
-            }
-            .card-header h1 {
-                font-size: 1.45rem;
-            }
+            .time-grid { grid-template-columns: 1fr 1fr; }
+            .form-body { padding: 20px 18px; }
+            .card-header h1 { font-size: 1.45rem; }
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <!-- 二维码分享卡片 -->
     <div class="qrcode-section">
         <div class="qrcode-title">📱 手机扫码 · 快捷预约</div>
         <div id="qrcode"></div>
@@ -351,7 +231,6 @@
         <div style="font-size: 0.7rem; color: #6889a5; margin-top: 10px;">* 扫码或分享链接，同事手机/电脑均可填写</div>
     </div>
 
-    <!-- 主预约表单 -->
     <div class="card">
         <div class="card-header">
             <h1>📅 玄武纪 · 会议室预约</h1>
@@ -359,19 +238,14 @@
         </div>
         <div class="form-body">
             <form id="bookingForm" novalidate>
-                <!-- 预约人姓名 -->
                 <div class="field">
                     <div class="field-label">📝 预约人员姓名 <span class="required-star">*</span></div>
                     <input type="text" id="fullName" placeholder="请填写真实姓名（部门+姓名）" autocomplete="off" required>
                 </div>
-
-                <!-- 使用人数 -->
                 <div class="field">
                     <div class="field-label">👥 使用人数 <span class="required-star">*</span></div>
                     <input type="number" id="attendees" min="1" value="2" step="1" required>
                 </div>
-
-                <!-- 会议室单选 -->
                 <div class="field">
                     <div class="field-label">🏢 会议室 <span class="required-star">*</span></div>
                     <div class="options-group" id="roomGroup">
@@ -381,8 +255,6 @@
                         <label class="option-item"><input type="radio" name="room" value="四楼会议室"> 四楼会议室</label>
                     </div>
                 </div>
-
-                <!-- 会议室用途 + 其他 -->
                 <div class="field">
                     <div class="field-label">🎯 会议室用途 <span class="required-star">*</span></div>
                     <div class="options-group" id="purposeGroup">
@@ -391,23 +263,17 @@
                         <label class="option-item"><input type="radio" name="purpose" value="其他" id="purposeOtherRadio"> 其他</label>
                     </div>
                     <div id="otherPurposeContainer" style="display: none; margin-top: 12px;">
-                        <input type="text" id="otherPurposeText" placeholder="请填写具体用途（如培训、面试等）" autocomplete="off">
+                        <input type="text" id="otherPurposeText" placeholder="请填写具体用途（如培训、面试等)" autocomplete="off">
                     </div>
                 </div>
-
-                <!-- 预约时段 (多选) -->
                 <div class="field">
                     <div class="field-label">⏰ 预约时段 <span class="required-star">*</span> <span class="hint">可多选，全天独立，最多7个时段</span></div>
                     <div class="time-grid" id="timeSlotsGroup"></div>
                 </div>
-
-                <!-- 使用日期 -->
                 <div class="field">
                     <div class="field-label">📆 使用日期 <span class="required-star">*</span></div>
                     <input type="date" id="useDate" required>
                 </div>
-
-                <!-- 桌牌 -->
                 <div class="field">
                     <div class="field-label">🏷️ 是否需要桌牌（姓名牌）<span class="required-star">*</span></div>
                     <div class="options-group">
@@ -415,8 +281,6 @@
                         <label class="option-item"><input type="radio" name="nameCard" value="否"> 否</label>
                     </div>
                 </div>
-
-                <!-- 水果 -->
                 <div class="field">
                     <div class="field-label">🍎 是否需要水果 <span class="required-star">*</span></div>
                     <div class="options-group">
@@ -424,8 +288,6 @@
                         <label class="option-item"><input type="radio" name="fruit" value="否"> 否</label>
                     </div>
                 </div>
-
-                <!-- 茶水 -->
                 <div class="field">
                     <div class="field-label">🍵 是否需要准备茶水 <span class="required-star">*</span></div>
                     <div class="options-group">
@@ -433,8 +295,6 @@
                         <label class="option-item"><input type="radio" name="tea" value="否"> 否</label>
                     </div>
                 </div>
-
-                <!-- 定制欢迎屏 -->
                 <div class="field">
                     <div class="field-label">🖥️ 是否需要定制特定欢迎屏 <span class="required-star">*</span></div>
                     <div class="options-group">
@@ -442,8 +302,6 @@
                         <label class="option-item"><input type="radio" name="welcomeScreen" value="否"> 否</label>
                     </div>
                 </div>
-
-                <!-- 参观一楼展厅 -->
                 <div class="field">
                     <div class="field-label">🏛️ 是否需要参观一楼展厅 <span class="required-star">*</span></div>
                     <div class="options-group">
@@ -451,8 +309,6 @@
                         <label class="option-item"><input type="radio" name="exhibition" value="否"> 否</label>
                     </div>
                 </div>
-
-                <!-- 接送服务 -->
                 <div class="field">
                     <div class="field-label">🚗 是否需要接送 <span class="required-star">*</span></div>
                     <div class="options-group">
@@ -468,7 +324,6 @@
                         <div class="hint" style="margin-top: 10px;">⚠️ 因司机需调配时间，请提前1天告知具体地点及时段，实际存在调配不确定性，建议优先自行安排。</div>
                     </div>
                 </div>
-
                 <div class="btn-group">
                     <button type="submit" class="btn btn-primary">✅ 提交预约</button>
                     <button type="button" id="clearFormBtn" class="btn btn-secondary">🗑️ 清空表单</button>
@@ -477,12 +332,11 @@
         </div>
     </div>
 
-    <!-- 历史预约记录 -->
     <div class="records-section">
         <div class="records-header">
             <span class="records-title">📋 已提交预约记录（本地存储）</span>
             <div style="display: flex; gap: 8px;">
-                <button id="exportCsvBtn" class="copy-link-btn" style="background:#eef3fc;">📎 导出CSV</button>
+                <button id="exportCsvBtn" class="copy-link-btn">📎 导出CSV</button>
                 <button id="clearAllRecordsBtn" class="copy-link-btn" style="color:#bc5a3c;">🗑️ 清空全部</button>
             </div>
         </div>
@@ -494,13 +348,60 @@
 <div id="toastMsg" class="toast"></div>
 
 <script>
-    // ---------- 时段预设 ----------
+    // ======================= 邮件配置（已填入你的真实参数） =======================
+    const EMAILJS_CONFIG = {
+        publicKey: "JAO7oi8dSd6UfebwD",      // 你的 Public Key
+        serviceID: "service_m78jtdh",        // 你的 SMTP 服务 ID
+        templateID: "gwxkypn"                // 你的 Template ID
+    };
+    // ========================================================================
+
+    // 初始化 EmailJS
+    (function() {
+        if (EMAILJS_CONFIG.publicKey && EMAILJS_CONFIG.publicKey !== "你的_Public_Key") {
+            emailjs.init(EMAILJS_CONFIG.publicKey);
+            console.log("EmailJS 已初始化");
+        } else {
+            console.warn("⚠️ 未配置 EmailJS Public Key，邮件通知功能未启用。");
+        }
+    })();
+
+    function sendEmailNotification(bookingData) {
+        if (!EMAILJS_CONFIG.publicKey || EMAILJS_CONFIG.publicKey === "你的_Public_Key") {
+            return Promise.reject("未配置 EmailJS");
+        }
+        const templateParams = {
+            name: bookingData.name,
+            people: bookingData.people,
+            room: bookingData.room,
+            purpose: bookingData.purpose,
+            date: bookingData.date,
+            timeSlots: bookingData.timeSlots.join('、'),
+            nameCard: bookingData.nameCard,
+            fruit: bookingData.fruit,
+            tea: bookingData.tea,
+            welcomeScreen: bookingData.welcomeScreen,
+            exhibition: bookingData.exhibition,
+            shuttle: bookingData.shuttle,
+            createdAt: bookingData.createdAt
+        };
+        return emailjs.send(EMAILJS_CONFIG.serviceID, EMAILJS_CONFIG.templateID, templateParams)
+            .then(response => {
+                console.log("邮件发送成功", response);
+                showToast("📧 预约通知已发送至管理员邮箱");
+            })
+            .catch(error => {
+                console.error("邮件发送失败", error);
+                showToast("⚠️ 邮件通知发送失败，但本地预约已保存", true);
+            });
+    }
+
+    // ---------- 以下为原有业务逻辑 ----------
     const TIME_SLOTS = [
         "上午8:00-9:00", "上午9:00-10:00", "上午10:00-11:00", "上午11:00-12:00",
         "下午13:30-15:00", "下午15:00-16:00", "下午16:00-17:00", "下午17:00-18:00", "全天"
     ];
 
-    // 动态生成时段复选框
     function renderTimeSlots() {
         const container = document.getElementById('timeSlotsGroup');
         if (!container) return;
@@ -522,27 +423,17 @@
     }
     renderTimeSlots();
 
-    // 全天互斥逻辑（全天与其他时段互斥）
     function setupTimeMutualExclusion() {
         const allCheckboxes = document.querySelectorAll('#timeSlotsGroup input[type="checkbox"]');
         const allDayCb = Array.from(allCheckboxes).find(cb => cb.value === '全天');
         if (!allDayCb) return;
         const otherSlots = allCheckboxes.filter(cb => cb.value !== '全天');
-        const handleAllDay = () => {
-            if (allDayCb.checked) {
-                otherSlots.forEach(cb => cb.checked = false);
-            }
-        };
-        const handleOtherChange = () => {
-            if (otherSlots.some(cb => cb.checked) && allDayCb.checked) {
-                allDayCb.checked = false;
-            }
-        };
+        const handleAllDay = () => { if (allDayCb.checked) otherSlots.forEach(cb => cb.checked = false); };
+        const handleOtherChange = () => { if (otherSlots.some(cb => cb.checked) && allDayCb.checked) allDayCb.checked = false; };
         allDayCb.addEventListener('change', handleAllDay);
         otherSlots.forEach(cb => cb.addEventListener('change', handleOtherChange));
     }
 
-    // 其他用途联动
     const purposeRadios = document.querySelectorAll('input[name="purpose"]');
     const otherContainer = document.getElementById('otherPurposeContainer');
     const otherRadio = document.getElementById('purposeOtherRadio');
@@ -560,7 +451,6 @@
     purposeRadios.forEach(radio => radio.addEventListener('change', toggleOtherField));
     toggleOtherField();
 
-    // 接送联动
     const shuttleYes = document.getElementById('shuttleYes');
     const shuttleNo = document.getElementById('shuttleNo');
     const shuttleDetailDiv = document.getElementById('shuttleDetailContainer');
@@ -571,10 +461,7 @@
             shuttleTypeRadios.forEach(radio => radio.required = true);
         } else {
             shuttleDetailDiv.style.display = 'none';
-            shuttleTypeRadios.forEach(radio => {
-                radio.required = false;
-                radio.checked = false;
-            });
+            shuttleTypeRadios.forEach(radio => { radio.required = false; radio.checked = false; });
         }
     }
     if (shuttleYes && shuttleNo) {
@@ -583,25 +470,19 @@
     }
     toggleShuttleDetail();
 
-    // 获取选中的时段列表
     function getSelectedTimeSlots() {
         const checkboxes = document.querySelectorAll('#timeSlotsGroup input[type="checkbox"]');
         return Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
     }
-
-    // 时段校验：至少1个，最多7个，全天独占
     function validateTimeSlots(selected) {
         if (!selected.length) return false;
         if (selected.includes('全天')) return selected.length === 1;
         return selected.length >= 1 && selected.length <= 7;
     }
-
     function getSelectedRadioValue(name) {
         const radio = document.querySelector(`input[name="${name}"]:checked`);
         return radio ? radio.value : null;
     }
-
-    // 获取接送最终文本
     function getShuttleFinalText() {
         const need = getSelectedRadioValue('needShuttle');
         if (need === '是') {
@@ -613,8 +494,6 @@
         }
         return null;
     }
-
-    // 轻提示
     function showToast(msg, isError = false) {
         const toast = document.getElementById('toastMsg');
         toast.textContent = msg;
@@ -622,15 +501,12 @@
         toast.style.opacity = '1';
         setTimeout(() => toast.style.opacity = '0', 2700);
     }
-
-    // ---------- localStorage 存储与渲染 ----------
     function saveBookingToLocal(booking) {
         let bookings = JSON.parse(localStorage.getItem('xuanwu_bookings_full') || '[]');
         bookings.unshift(booking);
         localStorage.setItem('xuanwu_bookings_full', JSON.stringify(bookings));
         renderBookingList();
     }
-
     function renderBookingList() {
         const container = document.getElementById('recordsList');
         const bookings = JSON.parse(localStorage.getItem('xuanwu_bookings_full') || '[]');
@@ -663,7 +539,6 @@
             });
         });
     }
-
     function deleteBooking(index) {
         let bookings = JSON.parse(localStorage.getItem('xuanwu_bookings_full') || '[]');
         if (index >= 0 && index < bookings.length) {
@@ -673,7 +548,6 @@
             showToast('已删除一条预约记录');
         }
     }
-
     function clearAllBookings() {
         if (confirm('⚠️ 确定要清空所有本地预约记录吗？数据不可恢复。')) {
             localStorage.removeItem('xuanwu_bookings_full');
@@ -681,30 +555,17 @@
             showToast('已清空全部记录');
         }
     }
-
     function exportToCSV() {
         const bookings = JSON.parse(localStorage.getItem('xuanwu_bookings_full') || '[]');
-        if (!bookings.length) {
-            showToast('无记录可导出', true);
-            return;
-        }
-        const headers = ["预约人", "人数", "会议室", "用途", "日期", "时段", "桌牌", "水果", "茶水", "欢迎屏", "展厅", "接送", "提交时间"];
+        if (!bookings.length) { showToast('无记录可导出', true); return; }
+        const headers = ["预约人","人数","会议室","用途","日期","时段","桌牌","水果","茶水","欢迎屏","展厅","接送","提交时间"];
         const rows = [headers];
         bookings.forEach(b => {
             rows.push([
-                `"${b.name.replace(/"/g, '""')}"`,
-                b.people,
-                `"${b.room.replace(/"/g, '""')}"`,
-                `"${b.purpose.replace(/"/g, '""')}"`,
-                b.date,
-                `"${b.timeSlots.join(';').replace(/"/g, '""')}"`,
-                b.nameCard,
-                b.fruit,
-                b.tea,
-                b.welcomeScreen,
-                b.exhibition,
-                b.shuttle,
-                b.createdAt
+                `"${b.name.replace(/"/g, '""')}"`, b.people,
+                `"${b.room.replace(/"/g, '""')}"`, `"${b.purpose.replace(/"/g, '""')}"`,
+                b.date, `"${b.timeSlots.join(';').replace(/"/g, '""')}"`,
+                b.nameCard, b.fruit, b.tea, b.welcomeScreen, b.exhibition, b.shuttle, b.createdAt
             ]);
         });
         const csvContent = rows.map(row => row.join(',')).join('\n');
@@ -717,18 +578,12 @@
         URL.revokeObjectURL(url);
         showToast('导出CSV成功');
     }
-
     function escapeHtml(str) {
         if (!str) return '';
-        return str.replace(/[&<>]/g, function(m) {
-            if (m === '&') return '&amp;';
-            if (m === '<') return '&lt;';
-            if (m === '>') return '&gt;';
-            return m;
-        });
+        return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
     }
 
-    // 提交表单逻辑
+    // 表单提交处理
     document.getElementById('bookingForm').addEventListener('submit', function(e) {
         e.preventDefault();
         const name = document.getElementById('fullName').value.trim();
@@ -777,6 +632,7 @@
             createdAt: submitTime
         };
         saveBookingToLocal(booking);
+        sendEmailNotification(booking).catch(err => console.warn("邮件发送失败但本地已保存", err));
         const detailText = `【玄武纪预约】\n预约人:${name} 人数:${people}\n会议室:${room}\n用途:${purpose}\n日期:${useDate}\n时段:${selectedSlots.join('、')}\n桌牌:${nameCard} 水果:${fruit} 茶水:${tea}\n欢迎屏:${welcomeScreen} 展厅:${exhibition}\n接送:${finalShuttle}`;
         if (confirm('✅ 预约已保存！\n是否复制详细信息以便发送给行政人员？')) {
             navigator.clipboard.writeText(detailText).then(() => showToast('已复制预约详情')).catch(() => showToast('复制失败', true));
@@ -789,7 +645,6 @@
         showToast('预约记录已保存到本地');
     });
 
-    // 清空表单
     document.getElementById('clearFormBtn').addEventListener('click', () => {
         if (confirm('确定清空当前表单所有已填写内容吗？')) {
             document.getElementById('bookingForm').reset();
@@ -808,11 +663,9 @@
     document.getElementById('clearAllRecordsBtn').addEventListener('click', clearAllBookings);
     document.getElementById('exportCsvBtn').addEventListener('click', exportToCSV);
     setupTimeMutualExclusion();
-    // 设置日期最小为今天
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('useDate').setAttribute('min', today);
 
-    // 生成二维码（当前页面URL）
     function generateQR() {
         const qrDiv = document.getElementById('qrcode');
         qrDiv.innerHTML = '';
